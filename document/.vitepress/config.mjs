@@ -22,6 +22,12 @@ export default defineConfig({
             }
         ],
 
+        // 页脚
+        footer: {
+            message: 'Released under the MIT License.',
+            copyright: 'Copyright © 2024-present BaoYuan'
+        },
+
         // 侧边栏
         sidebar: {
             '/': [],
@@ -38,9 +44,7 @@ export default defineConfig({
                 {
                     text: 'PHP',
                     items: [
-                        {text: 'Index', link: '/guide/'},
-                        {text: 'One', link: '/guide/one'},
-                        {text: 'Two', link: '/guide/two'}
+                        {text: 'PHP的发展历程', link: '/backend/php/development'}
                     ]
                 }
             ]
