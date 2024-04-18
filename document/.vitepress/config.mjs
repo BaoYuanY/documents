@@ -47,6 +47,16 @@ export default defineConfig({
                         {text: 'PHP的发展历程', link: '/backend/php/development'}
                     ]
                 }
+            ],
+            '/other/FFmpeg/': [
+                {
+                    text: 'FFmpeg',
+                    items: [
+                        {text: 'FFmpeg引言', link: '/other/FFmpeg/introduction'},
+                        {text: 'FFmpeg实用命令', link: '/other/FFmpeg/practicalCommands'},
+                        {text: '常用编码器与参数', link: '/other/FFmpeg/encoderAndParameters'},
+                    ]
+                }
             ]
         },
         socialLinks: [
