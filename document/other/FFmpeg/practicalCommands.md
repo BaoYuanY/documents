@@ -257,7 +257,7 @@ ffmpeg -i clip.mp4 -vf thumbnail,scale=-1:1080 -vframes 1 thumb.png
 ffmpeg -i clip.mp4 -vf thumbnail=30,scale=-1:1080 -vframes 3 thumb-%03d.pngs
 ```
 
-或者，利用在 [截取帧为图片]() 一节中提到的帧截取方法，指定截取某一帧作为图片：
+或者，利用在 [截取帧为图片](/other/FFmpeg/practicalCommands.html#截取帧为图片) 一节中提到的帧截取方法，指定截取某一帧作为图片：
 
 ```
 # 指定截取视频中的第 100 帧
@@ -336,7 +336,7 @@ FFmpeg 可以将字幕内挂到封装容器内，也可以内嵌到视频流中�
 
     - 如果用户没有该变量，请新建一个；其默认值一般是 `C:\Users\用户名\` 。
 
-    - 关于 `fonts.conf` 文件，请参考本文的附录 [附录：fonts.conf]() 。
+    - 关于 `fonts.conf` 文件，请参考本文的附录 [附录：fonts.conf](/other/FFmpeg/practicalCommands.html#附录-fonts-conf) 。
 
 ### 内挂字幕
 内挂字幕是一种相对于外挂字幕的称呼。外挂字幕是指将字幕存放在一个独立的字幕文件中，在播放视频时，通过视频播放器来加载这个字幕文件。而内挂字幕，是将这样一个独立的“字幕文件”，封装在了视频文件内部作为独立的字幕数据流。这样既能按需开启或关闭字幕，也免去了字幕文件丢失、匹配等烦恼。
@@ -472,7 +472,7 @@ ffmpeg -i video.mp4 -i audio.mp3 -c:v copy -map 0:v -map 1:a out.mp4
 :::
 
 ::: tip 🔔 重要
-本节以下的例子将以 libx264 编码器为例，并只是进行了粗略的介绍。关于编码器的更多详细内容，请参考 [常用编码器与参数]() 一节。
+本节以下的例子将以 libx264 编码器为例，并只是进行了粗略的介绍。关于编码器的更多详细内容，请参考 [常用编码器与参数](/other/FFmpeg/encoderAndParameters.html) 一节。
 :::
 
 视频的压制主要有 CRF（Constant Rate Factor，恒定率系数）与二压（2Pass）两种常用的方法，以及定限码率压制这种相对不常用的方法（不太推荐）：
