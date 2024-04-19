@@ -596,7 +596,7 @@ FFmpeg 支持在混流时向视频文件中写入元数据（metadata）；这�
 
 元数据需要存放在一个外部文件中，并遵循类似 `ini` 文件的格式。下面是官方文档 `Metadata - FFmpeg` 页面给出的例子：
 
-```angular2html
+```
 ;FFMETADATA1
 title=bike\\shed
 ;this is a comment
@@ -638,7 +638,7 @@ line
 
 要将上述元数据（例如存储在 `FFMETA.ini` 中）写入到视频文件，使用：
 
-```angular2html
+```
 ffmpeg -i video.mp4 -i FFMETA.ini -map_metadata 1 -c copy out.mp4
 ```
 
@@ -648,20 +648,20 @@ ffmpeg -i video.mp4 -i FFMETA.ini -map_metadata 1 -c copy out.mp4
 
 通过向 `-map_metadata` 参数传递值 `-1` 可以清除元数据。我们常用 `:g` 后缀来指定清除全局元数据（这不包括其他数据流比如字幕流内部的元数据）。通常，我们想要清除的元数据都是全局元数据：
 
-```angular2html
+```
 ffmpeg -i video.mp4 -map_metadata:g -1 -c copy out.mp4
 ```
 
 如果要尽可能地清除所有元数据（包括编码信息在内），则可以使用比特流过滤器 `filter_units`；但是，该参数仅支持 H264、VP9、H265、AV1 等部分格式作为输出。下例选自 FFmpeg 文档，它将只保留 NAL 1-5 （也即 VCL）的元数据信息。其中， `pass_types` 指定了仅要保留的 NAL 单元信息；与此相反，也可以使用 `remove_types` 来指定要清除的 NAL 单元信息。
 
 
-```angular2html
+```
 ffmpeg -i video.mp4 -map_metadata -1 -bsf:v 'filter_units=pass_types=1-5' -c copy out.mp4
 ```
 
 对于不受 `-bsf:v filter_units` 支持的输出格式，我们可以使用一种更老式的方法清除元数据。下例给出了将视频的音频转为 MP3 时，尽可能地清除所有元数据（包括编码信息）：
 
-```angular2html
+```
 ffmpeg -i video.mp4 -c:a libmp3lame -map_metadata:g -1 -fflags +bitexact -q:a 0 audio.mp3
 ```
 
@@ -680,7 +680,7 @@ FFmpeg 支持通过二次处理（2 Pass）的方式进行去抖动：先用 [vi
 
 以下是一个向 clip.mp4 应用去抖动的例子：
 
-```angular2html
+```
 ffmpeg -i clip.mp4 -vf vidstabdetect -f null NUL && `
 ffmpeg -i clip.mp4 -vf vidstabtransform,unsharp=5:5:0.8:3:3:0.4 -crf 17 clip-stablized.mp4
 ```
@@ -704,13 +704,13 @@ ffmpeg -i clip.mp4 -vf vidstabtransform,unsharp=5:5:0.8:3:3:0.4 -crf 17 clip-sta
 
 要检查一个视频的现有色彩空间信息，可以使用 FFmpeg 安装时附带的 `ffprobe` 工具：
 
-```angular2html
+```
 ffprobe -v quiet -show_streams -select_streams v:0 -i video.mp4 | select-string "color"
 ```
 
 以上是 Windows 平台 Powershell 的示例，在 Mac/Linux 平台可以将 `select-string` 换为 `grep` 命令。上述命令会返回类似的输出结果：
 
-```angular2html
+```
 color_range=tv
 color_space=bt709
 color_transfer=unknown
@@ -722,7 +722,7 @@ color_primaries=bt709
 如果发现上述值有较多 unknown，可以在重新编码视频的过程中指定正确的色彩空间。下例对视频用 H.265 进行了重编码并指定 BT.709 色彩空间，建议指定一个 CRF 值或者码率（此处为 8Mb/s）：
 
 
-```angular2html
+```
 ffmpeg -i "video.mp4" -colorspace bt709 -color_trc bt709 -color_primaries bt709 -c:v libx265 -b:v 8M -c:a copy "colorspace.mp4"
 ```
 
@@ -749,7 +749,7 @@ FFmpeg 支持显卡硬件加速；本节主要以 Nvidia 的显卡与 H.264 编�
 
 显卡加速使用特殊的编码器（而不是 CPU 编码时的标准编码器），它们通常以 `nvenc` （或者 `cuvid` ）结尾。用户可以使用 `-codec` 来查找当前安装的 FFmpeg 是否在编译时添加了这些编码器的支持。下面是我的古董级 GTX 960M 机器返回的信息，例中可以看到对 H.264 解码器支持 `h264_cuvid` 、编码器支持 `h264_nvenc`。
 
-```angular2html
+```
 # Windows Powershell 用户：ffmpeg -codecs | select-string nvenc
 ffmpeg -codecs | grep nvenc
 ...
@@ -769,14 +769,14 @@ DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoder
 
 混合模式直接指定编码器为支持硬件加速的编码器即可，比如 `h264_nvenc`：
 
-```angular2html
+```
 # CPU+GPU 混合模式
 ffmpeg -i video.mp4 -c:v h264_nvenc -c:a copy out.mp4
 ```
 
 独占模式需要指定额外的输入参数 `-hwaccel` 与 `-hwaccel_output_format` 的值为 `cuda`，表示启用 cuvid 解码器与 nvenc 编码器。
 
-```angular2html
+```
 # GPU 独占模式
 ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -c:a copy out.mp4
 ```
@@ -788,7 +788,7 @@ ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -c
 由于 `h264_nvenc` 编码器不支持 CRF 参数，我个人的习惯是通过 `-rc` 参数来设置 `vbr_hq` 可变码率模式，并手动指定 `-b:v` 视频码率的数值。例如下述命令使用可变码率模式，并将视频设置在 2Mbps 附近：
 
 
-```angular2html
+```
 ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -rc vbr_hq -b:v 2M -c:a copy out.mp4
 ```
 
@@ -797,7 +797,7 @@ ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -r
 
 另一种方式是使用 `-cq` 参数。默认的硬件加速结果 q 值（据笔者测试）大约在 25 左右，用户可以通过稍微调高该值来获得压缩效果，例如：
 
-```angular2html
+```
 ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -rc vbr_hq -cq 28 -qmin 28 -c:a copy out.mp4
 ```
 
