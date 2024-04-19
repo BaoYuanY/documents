@@ -592,70 +592,287 @@ Youtube 的音频码率推荐则为单声道 128 Kbps、环绕声 384 Kbps 以�
 
 ## 元数据：添加章节信息
 
+FFmpeg 支持在混流时向视频文件中写入元数据（metadata）；这其中最实用的大概是章节（chapter）跳转的元数据，它得到了许多主流播放器的支持（例如 MPV）。
 
+元数据需要存放在一个外部文件中，并遵循类似 `ini` 文件的格式。下面是官方文档 `Metadata - FFmpeg` 页面给出的例子：
 
+```angular2html
+;FFMETADATA1
+title=bike\\shed
+;this is a comment
+artist=FFmpeg troll team
 
+[CHAPTER]
+TIMEBASE=1/1000
+START=0
+#chapter ends at 0:01:00
+END=60000
+title=chapter \#1
 
+[CHAPTER]
+TIMEBASE=1/1000
+START=60000
+#chapter ends at 0:02:00
+END=120000
+title=chapter \#2
 
+[STREAM]
+title=multi\
+line
+```
 
+- 文件一般在首行含有标记头，以分号开启。上例中的标记头是 `FFMETADATA`，版本是 1
 
+- 元数据以键值对 `key=value` 的形式书写，每对占一行。注意，等号两侧的空格会被保留，因此不推荐留空格。
+
+- 特殊字符
+
+  - 文件中的行如果以 `;` 或 `#` 开头，则表示注释。
+
+  - 如果键值对中的值含有字符等号 `=`，反斜线 `\`，或者注释符号 `;` 或 `#`，那么必须在它们前面加上一个额外的反斜线来转义。
+
+- 元数据可以按章（chapter）或者流（stream）分节，每一节的名称需要 **大写** 且放在中括号内。在第一节之前的键值对，表示全局元数据。
+
+- 每一节内可以指定一个 `TIMEBASE=n1/n2` 键，表示章节起止时刻的时间单位，其中 `n1` 与 `n2` 都必须是正整数。上例中的 `1/1000` 表示千分之一秒（即毫秒），因而 `END=60000` 表示第一章在第 60000 毫秒也即第 60 秒处结束。如果未指定 TIMEBASE 键的值，那么会默认使用纳秒（十亿分之一秒，即
+秒）。
+
+要将上述元数据（例如存储在 `FFMETA.ini` 中）写入到视频文件，使用：
+
+```angular2html
+ffmpeg -i video.mp4 -i FFMETA.ini -map_metadata 1 -c copy out.mp4
+```
+
+其中的 `1` 表示将第二个（因为从0开始索引）输入文件，即第二个 `-i` 之后的参数值 `FFMETA.ini` 映射为元数据。
 
 ## 元数据：清楚元数据
 
+通过向 `-map_metadata` 参数传递值 `-1` 可以清除元数据。我们常用 `:g` 后缀来指定清除全局元数据（这不包括其他数据流比如字幕流内部的元数据）。通常，我们想要清除的元数据都是全局元数据：
+
+```angular2html
+ffmpeg -i video.mp4 -map_metadata:g -1 -c copy out.mp4
+```
+
+如果要尽可能地清除所有元数据（包括编码信息在内），则可以使用比特流过滤器 `filter_units`；但是，该参数仅支持 H264、VP9、H265、AV1 等部分格式作为输出。下例选自 FFmpeg 文档，它将只保留 NAL 1-5 （也即 VCL）的元数据信息。其中， `pass_types` 指定了仅要保留的 NAL 单元信息；与此相反，也可以使用 `remove_types` 来指定要清除的 NAL 单元信息。
 
 
+```angular2html
+ffmpeg -i video.mp4 -map_metadata -1 -bsf:v 'filter_units=pass_types=1-5' -c copy out.mp4
+```
 
+对于不受 `-bsf:v filter_units` 支持的输出格式，我们可以使用一种更老式的方法清除元数据。下例给出了将视频的音频转为 MP3 时，尽可能地清除所有元数据（包括编码信息）：
 
+```angular2html
+ffmpeg -i video.mp4 -c:a libmp3lame -map_metadata:g -1 -fflags +bitexact -q:a 0 audio.mp3
+```
 
+有时候我们也会再额外添加 `-flags:v +bitexact` 与 `-flags:a +bitexact` 参数作为补充。
 
 
 
 ## 网络视频优化：快速加载
 
-
-
-
-
-
-
+使用 `-movflags +faststart` 参数，可以在输出时让视频文件将一些数据前置，从而实现在网络视频未被全部下载时就能够开始播放。
 
 
 ## 视频稳定/去抖动
 
+FFmpeg 支持通过二次处理（2 Pass）的方式进行去抖动：先用 [vidstabdetect](https://ffmpeg.org/ffmpeg-filters.html#vidstabdetect) 过滤器检测并生成一个 `trf` 文件，再用 [vidstabtransform](https://ffmpeg.org/ffmpeg-filters.html#vidstabtransform) 根据该文件以及用户给出的去抖动参数，完成图像变换（并通常配合 [unsharp](https://ffmpeg.org/ffmpeg-filters.html#unsharp) 过滤器进行适量锐化）。
 
+以下是一个向 clip.mp4 应用去抖动的例子：
 
+```angular2html
+ffmpeg -i clip.mp4 -vf vidstabdetect -f null NUL && `
+ffmpeg -i clip.mp4 -vf vidstabtransform,unsharp=5:5:0.8:3:3:0.4 -crf 17 clip-stablized.mp4
+```
 
+- 第一行行末的 NUL 之后的内容是 Powershell 的换行记号，为了能够一次执行整个过程。如果愿意分两次输入命令，则换行记号不是必须的。
 
+- `-f null NUL` 表示 Pass 1 不输出视频文件。尽管如此，Pass 1 会默认生成一个 transform.trf 文件。
+
+- Pass 2 中的过滤器也接受其他参数。常用的是用 `smoothing` 指定平滑半径所用的帧数量（默认 10，表示查看前后 10 帧共 21 帧），以及用 `input` 指定接受的变换文件的文件名（默认 transform.trf）： `-vf vidstabtransform=smoothing=10:input=transform.trf`
+
+- **总是推荐在使用 vidstabtransform 过滤器的同时，也使用 unsharp 过滤器**。本例中 unsharp 过滤器的参数来自官方 FFmpeg 文档的例子。
+
+- 上例中使用了 CRF=17 的高品质输出。在实际中，应按需设置视频质量参数。
 
 
 
 
 ## 更改色彩空间
 
+以我们最常用的 BT.709 色彩空间为例，许多视频播放器必须检测到色彩空间的元数据信息为 BT.709 才能正常地播放，否则可能引起偏色等问题。如果一个视频在播放时发生了色彩异常（通常发生于在不同设备、屏幕上播放时），那么我们需要检查视频的色彩空间信息并进行修正。
+
+要检查一个视频的现有色彩空间信息，可以使用 FFmpeg 安装时附带的 `ffprobe` 工具：
+
+```angular2html
+ffprobe -v quiet -show_streams -select_streams v:0 -i video.mp4 | select-string "color"
+```
+
+以上是 Windows 平台 Powershell 的示例，在 Mac/Linux 平台可以将 `select-string` 换为 `grep` 命令。上述命令会返回类似的输出结果：
+
+```angular2html
+color_range=tv
+color_space=bt709
+color_transfer=unknown
+color_primaries=bt709
+```
+
+以普通的 SDR 视频为例，上述就是一个正常的输出（因为 `color_transfer` 默认跟随了其他两项设置；如果是 HDR 视频，则该参数取值可能不同）。其中， `color_range` 也可能是 tv/limited 或者 pc/full。一般而言，只要视频中的 `color_space` 与 `color_primaries` 已赋值（即不是 unknown），那么视频在播放时就能够正常地还原色彩。
+
+如果发现上述值有较多 unknown，可以在重新编码视频的过程中指定正确的色彩空间。下例对视频用 H.265 进行了重编码并指定 BT.709 色彩空间，建议指定一个 CRF 值或者码率（此处为 8Mb/s）：
 
 
+```angular2html
+ffmpeg -i "video.mp4" -colorspace bt709 -color_trc bt709 -color_primaries bt709 -c:v libx265 -b:v 8M -c:a copy "colorspace.mp4"
+```
 
-
-
-
-
+关于更多色彩空间的参数信息，可以参考 FFmpeg 官方文档的 [setparams](https://ffmpeg.org/ffmpeg-all.html#setparams-1) 这一节。
 
 ## 显卡硬件加速
 
+FFmpeg 支持显卡硬件加速；本节主要以 Nvidia 的显卡与 H.264 编码方式为例展示一些用法。
+
+### 硬件支持
+
+关于用户当前的显卡支持哪些编码格式的硬件加速，可以参考 Nvidia 给出的一张表格： [Video Encode and Decode GPU Support Matrix](https://developer.nvidia.com/video-encode-decode-gpu-support-matrix) 。简要来说，大概是：
+
+- 大多 Maxwell 一代显卡（GTX 745/850/850M/960M 及同代更高型号）支持完整的 H.264 编码硬件加速
+- Maxwell 二代（GTX 750/950/965M 及同代更高型号）还支持 4K YUV 4:2:0 的 H.265 编码硬件加速
+- 大多 Pascal 显卡（GTX 1050 及同代更高型号）及之后架构的显卡，都支持完整的 H.265 编码硬件加速
+- 较新的显卡对于其他主流的编码格式，如 VP9 等，也有硬件加速支持
+
+### FFmpeg 支持
+
+::: tip 🔔 重要
+由于 FFmpeg 存在众多的编译版本，用户正使用的不一定包含了硬件加速功能。但官方提供的预编译版本均涵盖了该功能，本文也不再对如何在编译时引入硬件加速支持进行介绍。
+:::
+
+显卡加速使用特殊的编码器（而不是 CPU 编码时的标准编码器），它们通常以 `nvenc` （或者 `cuvid` ）结尾。用户可以使用 `-codec` 来查找当前安装的 FFmpeg 是否在编译时添加了这些编码器的支持。下面是我的古董级 GTX 960M 机器返回的信息，例中可以看到对 H.264 解码器支持 `h264_cuvid` 、编码器支持 `h264_nvenc`。
+
+```angular2html
+# Windows Powershell 用户：ffmpeg -codecs | select-string nvenc
+ffmpeg -codecs | grep nvenc
+...
+DEV.LS h264                 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (decoders: h264 h264_qsv h264_cuvid ) (encoders: libx264 libx264rgb h264_amf h264_mf h264_nvenc h264_qsv nvenc nvenc_h264 )
+DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoders: hevc hevc_qsv evc_cuvid ) (encoders: libx265 nvenc_hevc hevc_amf hevc_mf hevc_nvenc hevc_qsv )
+```
+
+以 `h264_nvenc` 编码器为例，说明几个注意点：
+
+- 编码器 `h264_nvenc` 使用与常规编码器 `libx264` 不同的 `-preset` 参数选项，可以通过如 `ffmpeg -h encoder=h264_nvenc` 的命令查看。
+- 编码器 `h264_nvenc` **不支持 CRF 参数控制压制质量**，用户需要使用其他的参数，比如粗糙的 `-qp` 参数，或者 `-rc`参数来指定码率控制模式并配合其他参数（例如 `-b:v` 参数）。
+- 关于该编码器的详细帮助，可以参考 `ffmpeg -h encoder=h264_nvenc` 命令给出的参数列表。
+
+### 硬件加速命令
+
+硬件加速有混合模式（CPU 与 GPU 共同工作）与独占模式（完全 GPU 工作）两种。
+
+混合模式直接指定编码器为支持硬件加速的编码器即可，比如 `h264_nvenc`：
+
+```angular2html
+# CPU+GPU 混合模式
+ffmpeg -i video.mp4 -c:v h264_nvenc -c:a copy out.mp4
+```
+
+独占模式需要指定额外的输入参数 `-hwaccel` 与 `-hwaccel_output_format` 的值为 `cuda`，表示启用 cuvid 解码器与 nvenc 编码器。
+
+```angular2html
+# GPU 独占模式
+ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -c:a copy out.mp4
+```
+
+上述命令会自动以 2000 kbps（即 2Mbps）左右的总文件比特率（视频、音频多轨综合，因此单独看视频码率可能会略高于 2M ）来压缩视频。
+
+### 硬件加速下的质量控制
+
+由于 `h264_nvenc` 编码器不支持 CRF 参数，我个人的习惯是通过 `-rc` 参数来设置 `vbr_hq` 可变码率模式，并手动指定 `-b:v` 视频码率的数值。例如下述命令使用可变码率模式，并将视频设置在 2Mbps 附近：
 
 
+```angular2html
+ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -rc vbr_hq -b:v 2M -c:a copy out.mp4
+```
+
+在此基础上，用户还可以配合 `-maxrate` 来限制最大码率、用 `-bufsize` 来调整缓冲区大小（缓冲区越小，码率波动越小）、用 `rc_lookahead` 来设定前览帧数等。用户可以参考 [FFmpeg Wiki - Limiting the output bitrate](https://wklchris.github.io/blog/FFmpeg/FFmpeg.html#id26:~:text=FFmpeg%20Wiki%20%2D%20Limiting%20the%20output%20bitrate) 页面。
 
 
+另一种方式是使用 `-cq` 参数。默认的硬件加速结果 q 值（据笔者测试）大约在 25 左右，用户可以通过稍微调高该值来获得压缩效果，例如：
 
+```angular2html
+ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i video.mp4 -c:v h264_nvenc -rc vbr_hq -cq 28 -qmin 28 -c:a copy out.mp4
+```
 
+其中 `-qmin` 参数能够限制最小的 q 值（控制质量上限，减小文件体积）；类似的还有 `-qmax` 参数，只不过作用相反。作为参考，笔者使用该命令来转码一个 2250Kbps 视频码率、时长6分钟的 99M 大小的视频文件，得到了 1814Kbps 的大小为 80M 的输出结果。
 
+要查看更多 FFmpeg 硬件加速的内容，比如对 AMD 等硬件的支持，请查看 [HWAccelIntro](https://trac.ffmpeg.org/wiki/HWAccelIntro) 页面。
 
 ## 附录：fonts.conf
 
+本文件来源于 [FiveYellowMice/how-to-convert-videos-with-ffmpeg-zh](https://github.com/FiveYellowMice/how-to-convert-videos-with-ffmpeg-zh/blob/master/etc/fontconfig-windows/fonts.conf) 仓库。
 
+```xml
+<?xml version="1.0"?>
+<fontconfig>
 
+<dir>C:\WINDOWS\Fonts</dir>
 
+<match target="pattern">
+<test qual="any" name="family"><string>mono</string></test>
+<edit name="family" mode="assign"><string>monospace</string></edit>
+</match>
 
+<match target="pattern">
+<test qual="all" name="family" compare="not_eq"><string>sans-serif</string></test>
+<test qual="all" name="family" compare="not_eq"><string>serif</string></test>
+<test qual="all" name="family" compare="not_eq"><string>monospace</string></test>
+<edit name="family" mode="append_last"><string>sans-serif</string></edit>
+</match>
+
+<alias>
+<family>Times</family>
+<prefer><family>Times New Roman</family></prefer>
+<default><family>serif</family></default>
+</alias>
+<alias>
+<family>Helvetica</family>
+<prefer><family>Arial</family></prefer>
+<default><family>sans</family></default>
+</alias>
+<alias>
+<family>Courier</family>
+<prefer><family>Courier New</family></prefer>
+<default><family>monospace</family></default>
+</alias>
+<alias>
+<family>serif</family>
+<prefer><family>Times New Roman</family></prefer>
+</alias>
+<alias>
+<family>sans</family>
+<prefer><family>Arial</family></prefer>
+</alias>
+<alias>
+<family>monospace</family>
+<prefer><family>Andale Mono</family></prefer>
+</alias>
+<match target="pattern">
+<test name="family" compare="eq">
+<string>Courier New</string>
+</test>
+<edit name="family" mode="prepend">
+<string>monospace</string>
+</edit>
+</match>
+<match target="pattern">
+<test name="family" compare="eq">
+<string>Courier</string>
+</test>
+<edit name="family" mode="prepend">
+<string>monospace</string>
+</edit>
+</match>
+
+</fontconfig>
+```
 
 
 
