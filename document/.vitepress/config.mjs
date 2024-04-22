@@ -24,8 +24,9 @@ export default defineConfig({
 
         // 页脚
         footer: {
-            message: 'Released under the MIT License.',
-            copyright: 'Copyright © 2024-present BaoYuan'
+            // message: 'Released under the MIT License.',
+            message: 'Copyright © 2024-present BaoYuan',
+            copyright: '<a href="http://beian.miit.gov.cn/">豫ICP备2023010776号-2</a>'
         },
 
         // 侧边栏
