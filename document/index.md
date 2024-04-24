@@ -10,8 +10,8 @@ hero:
       text: FFmpeg
       link: /other/FFmpeg/
     - theme: alt  
-      text: TODO
-      link: /TODO
+      text: Manticore Search
+      link: /db/ManticoreSearch/
 
 features:
   - title: 📑  学习
