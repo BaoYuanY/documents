@@ -5,6 +5,12 @@ export default defineConfig({
     title: "BY's Documents",
     description: "Documents",
     head: [['link', {rel: 'icon', href: '/images/logo.png'}]],
+    markdown: {
+        image: {
+            // 图片懒加载
+            // lazyLoading: true
+        }
+    },
     themeConfig: {
 
         // logo
