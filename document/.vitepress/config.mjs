@@ -23,7 +23,8 @@ export default defineConfig({
             {
                 text: 'Other',
                 items: [
-                    {text: 'FFmpeg', link: '/other/FFmpeg/'}
+                    {text: 'FFmpeg', link: '/other/FFmpeg/'},
+                    {text: 'Docker', link: '/other/Docker/'},
                 ]
             }
         ],
