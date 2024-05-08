@@ -1,5 +1,7 @@
 ---
-outline: deep
+title: 示例
+titleTemplate: 示例
+outline: 'deep'
 ---
 
 # Runtime API Examples
