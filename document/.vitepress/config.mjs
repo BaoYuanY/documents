@@ -24,6 +24,7 @@ export default defineConfig({
                 text: 'Other',
                 items: [
                     {text: 'FFmpeg', link: '/other/FFmpeg/'},
+                    {text: 'Manticore', link: '/other/ManticoreSearch/'},
                     {text: 'Docker', link: '/other/Docker/'},
                 ]
             }
