@@ -4,7 +4,10 @@ import {defineConfig} from 'vitepress'
 export default defineConfig({
     title: "BY's Documents",
     description: "Documents",
-    head: [['link', {rel: 'icon', href: '/images/logo.png'}]],
+    head: [
+        ['link', {rel: 'icon', href: '/images/logo.png'}],
+        ['link', {rel: 'manifest', href: '/manifest.json'}]
+    ],
     markdown: {
         image: {
             // 图片懒加载
