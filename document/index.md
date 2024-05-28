@@ -6,12 +6,12 @@ hero:
   text: "Colorful and diverse"
   tagline: Make a good record
   actions:
-    - theme: brand  
-      text: FFmpeg
-      link: /other/FFmpeg/
-    - theme: alt  
-      text: Manticore Search
-      link: /db/ManticoreSearch/
+#    - theme: brand  
+#      text: FFmpeg
+#      link: /other/FFmpeg/
+#    - theme: alt  
+#      text: Manticore Search
+#      link: /db/ManticoreSearch/
 
 features:
   - title: 📑  学习

@@ -23,14 +23,14 @@ export default defineConfig({
         nav: [
             {text: 'Home', link: '/'},
             //{ text: '后端', link: '/backend/' },
-            {
-                text: 'Other',
-                items: [
-                    {text: 'FFmpeg', link: '/other/FFmpeg/'},
-                    {text: 'Manticore Search', link: '/db/ManticoreSearch/'},
-                    {text: 'Docker', link: '/other/Docker/'},
-                ]
-            }
+            // {
+            //     text: 'Other',
+            //     items: [
+            //         {text: 'FFmpeg', link: '/other/FFmpeg/'},
+            //         {text: 'Manticore Search', link: '/db/ManticoreSearch/'},
+            //         {text: 'Docker', link: '/other/Docker/'},
+            //     ]
+            // }
         ],
 
         // 页脚
@@ -88,6 +88,7 @@ export default defineConfig({
                             ]
                         },
                         {text: '快速入门指南', link: '/db/ManticoreSearch/quickStartGuide'},
+                        {text: '启动服务器', link: '/db/ManticoreSearch/startServer'},
                     ]
                 }
             ],
