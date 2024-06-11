@@ -70,28 +70,6 @@ export default defineConfig({
                     ]
                 }
             ],
-            '/db/ManticoreSearch/': [
-                {
-                    text: 'Manticore Search',
-                    items: [
-                        {text: '介绍', link: '/db/ManticoreSearch/introduction'},
-                        {text: '⚠️请先阅读', link: '/db/ManticoreSearch/readThisFirst'},
-                        {
-                            text: '安装',
-                            collapsed: true,
-                            items: [
-                                {text: 'Docker', link: '/db/ManticoreSearch/installation/Docker'},
-                                {text: 'RedHat or CentOS', link: '/db/ManticoreSearch/installation/RedhatOrCentOS'},
-                                {text: 'Debian or Ubuntu', link: '/db/ManticoreSearch/installation/DebianOrUbuntu'},
-                                {text: 'MacOS', link: '/db/ManticoreSearch/installation/MacOS'},
-                                {text: 'Windows', link: '/db/ManticoreSearch/installation/Windows'},
-                            ]
-                        },
-                        {text: '快速入门指南', link: '/db/ManticoreSearch/quickStartGuide'},
-                        {text: '启动服务器', link: '/db/ManticoreSearch/startServer'},
-                    ]
-                }
-            ],
             '/other/Docker/': [
                 {
                     text: 'Docker',
