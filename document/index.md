@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "BY's Documents"
   text: "Colorful and diverse"
-  tagline: Make a good record
+  tagline: Be a good recorder.
   actions:
 #    - theme: brand  
 #      text: FFmpeg
