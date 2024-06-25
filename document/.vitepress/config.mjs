@@ -22,6 +22,12 @@ export default defineConfig({
         // 导航 https://vitepress.dev/reference/default-theme-config
         nav: [
             {text: 'Home', link: '/'},
+            {
+                text: 'BE',
+                items: [
+                    {text: 'Rust', link: '/backend/rust/'},
+                ]
+            },
             //{ text: '后端', link: '/backend/' },
             // {
             //     text: 'Other',
@@ -149,10 +155,24 @@ export default defineConfig({
                         {text: 'podman 下一代 Linux 容器工具', link: '/other/Docker/podman'},
                     ]
                 }
+            ],
+            '/backend/rust/': [
+                {
+                    text: 'Rust',
+                    items: [
+                        {text: '安装', link: '/backend/rust/install'},
+                    ]
+                }
             ]
         },
         socialLinks: [
-            {icon: 'telegram', link: 'https://t.me/BaoYuanY'}
+            // {icon: 'telegram', link: 'https://t.me/BaoYuanY'}
+            {
+                icon: {
+                    svg: '<svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4262" width="512" height="512"><path d="M417.28 795.733333l11.946667-180.48 327.68-295.253333c14.506667-13.226667-2.986667-19.626667-22.186667-8.106667L330.24 567.466667 155.306667 512c-37.546667-10.666667-37.973333-36.693333 8.533333-55.466667l681.386667-262.826666c31.146667-14.08 61.013333 7.68 49.066666 55.466666l-116.053333 546.56c-8.106667 38.826667-31.573333 48.213333-64 30.293334L537.6 695.466667l-84.906667 82.346666c-9.813333 9.813333-17.92 17.92-35.413333 17.92z" fill="#2c2c2c" p-id="4263"></path></svg>'
+                },
+                link: 'https://t.me/BaoYuanY',
+            },
         ]
     }
 })
