@@ -160,6 +160,7 @@ export default defineConfig({
                 {
                     text: 'Rust',
                     items: [
+                        {text: '介绍', link: '/backend/rust/introduce'},
                         {text: '安装', link: '/backend/rust/install'},
                     ]
                 }
