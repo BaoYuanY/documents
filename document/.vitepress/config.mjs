@@ -161,7 +161,9 @@ export default defineConfig({
                     text: 'Rust',
                     items: [
                         {text: '介绍', link: '/backend/rust/introduce'},
+                        {text: '学前教育', link: '/backend/rust/preschoolEducation'},
                         {text: '安装', link: '/backend/rust/install'},
+                        {text: '创建一个项目', link: '/backend/rust/createProject'},
                     ]
                 }
             ]
